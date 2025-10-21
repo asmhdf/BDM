@@ -55,6 +55,10 @@
                 <button type="submit" class="btn btn-modern-primary w-100 mb-4">
                     <i class="fas fa-sign-in-alt me-2"></i>Se connecter
                 </button>
+
+               <button id="biometricLogin" type="button" class="btn btn-success mt-3">
+                    <i class="bi bi-fingerprint"></i> Connexion biométrique
+                </button>
             </form>
             
             <div class="text-center">
@@ -66,5 +70,7 @@
         </div>
     </div>
 </div>
+<script src="js/biometric.js"></script>
+
 
 <?php require __DIR__ . '/footer.php'; ?>

@@ -1,0 +1,7 @@
+{
+    "require": {
+        "lbuchs/webauthn": "^2.2",
+        "paypal/paypal-checkout-sdk": "^1.0",
+        "paypal/rest-api-sdk-php": "^1.14"
+    }
+}

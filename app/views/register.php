@@ -73,8 +73,19 @@
                 <button type="submit" class="btn btn-modern-primary w-100 mb-4">
                     <i class="fas fa-user-plus me-2"></i>Créer mon compte
                 </button>
+                 <?php
+                 if (session_status() === PHP_SESSION_NONE) session_start();
+                 if (!empty($_SESSION['user']['id'])): ?>
+                     <button id="webauthnRegisterBtn" type="button" class="btn btn-secondary mt-2" onclick="startWebAuthnRegister()">Enregistrer une clé (biométrie)</button>
+                     <script src="js/webauthn_register.js"></script>
+                 <?php else: ?>
+                     <div class="mt-2 text-muted small">
+                         Après création du compte vous pourrez ajouter une clé biométrique depuis votre espace personnel.
+                     </div>
+                 <?php endif; ?>
             </form>
             <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+            
 
             
             <div class="text-center">

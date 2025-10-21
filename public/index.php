@@ -10,6 +10,7 @@ require_once __DIR__ . '/../app/controllers/ProductController.php';
 require_once __DIR__ . '/../app/controllers/CartController.php';
 require_once __DIR__ . '/../app/controllers/OrderController.php';
 require_once __DIR__ . '/../app/controllers/AdminHomeController.php';
+require_once __DIR__ . '/../app/controllers/PaymentController.php';
 
 // Create a reusable instance of OrderController
 $orderController = new OrderController($pdo);
@@ -58,6 +59,21 @@ switch ($action) {
     case 'login':
         (new AuthController($pdo))->login();
         break;
+     case 'webauthn_login_options':
+        (new AuthController($pdo))->webauthnLoginOptions();
+        break;
+    case 'webauthn_verify_assertion':
+        (new AuthController($pdo))->webauthnVerifyAssertion();
+        break;  
+    case 'webauthn_register_options':
+        (new AuthController($pdo))->webauthnRegisterOptions();
+        break;
+    case 'webauthn_finish_registration':
+        (new AuthController($pdo))->webauthnFinishRegistration();
+        break;
+    case 'webauthn_setup':
+        (new AuthController($pdo))->webauthnSetup();
+        break;
 
     // ----------- Order Actions -----------
     case 'order_form':
@@ -95,12 +111,26 @@ switch ($action) {
     // ----------- Default: Home Page -----------
     case 'home':
     default:
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $currentUserType = $_SESSION['user']['usertype'] ?? null;
         // If the user is logged in as admin, show admin home
-        if (!empty($_SESSION['user']) && $_SESSION['user']['usertype'] === 'admin') {
+        if ($currentUserType === 'admin') {
             (new AdminHomeController($pdo))->index();
         } else {
             // Otherwise, show regular home page
             (new HomeController($pdo))->index();
         }
         break;
+    
+        // ...existing code...
+        case 'payment_page':
+            (new PaymentController($pdo))->paymentPage();
+            break;
+        case 'create_paypal_order':
+            (new PaymentController($pdo))->createPayPalOrder();
+            break;
+        case 'capture_paypal_order':
+            (new PaymentController($pdo))->capturePayPalOrder();
+            break;
+        
 }

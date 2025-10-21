@@ -58,31 +58,109 @@ class OrderController {
      * Redirects to the order confirmation page.
      */
     public function submit() {
-        // Check if the user is logged in
-        if (!isset($_SESSION['user'])) {
-            header('Location: index.php?action=login');
-            exit;
-        }
-        $user = $_SESSION['user']; // Get user info from session
-        $nom = $_POST['nom']; // Get name from POST request
-        $email = $_POST['email']; // Get email from POST request
-        $adresse = $_POST['adresse']; // Get address from POST request
-        $paiement = $_POST['paiement']; // Get payment method from POST request
-        $cart = $_SESSION['cart'] ?? []; // Get cart items from session
-        $products = [];
-        // Loop through cart items
-        foreach ($cart as $id => $qty) {
-            $product = $this->productModel->getById($id); // Get product details by id
-            if ($product) {
-                $product['quantity'] = $qty; // Add quantity to product array
-                $products[] = $product;
-            }
-        }
-        $commande_id = $this->orderModel->create($user['id'], $nom, $email, $adresse, $paiement, $products); // Create order in database
-        $_SESSION['cart'] = []; // Clear cart
-        header("Location: index.php?action=order_confirm&id=$commande_id"); // Redirect to order confirmation page
+    if (session_status() === PHP_SESSION_NONE) session_start();
+
+    // Require login
+    if (empty($_SESSION['user']['id'])) {
+        header('Location: index.php?action=login');
         exit;
     }
+    $user = $_SESSION['user'];
+
+    // Read form
+    $nom     = trim($_POST['nom'] ?? '');
+    $email   = trim($_POST['email'] ?? '');
+    $adresse = trim($_POST['adresse'] ?? '');
+    $paiement= trim($_POST['paiement'] ?? '');
+
+    // Load cart (support two shapes: [id => qty] or [ [id, quantity, subtotal], ... ])
+    $cart = $_SESSION['cart'] ?? [];
+    $products = [];
+    $total = 0.0;
+
+    foreach ($cart as $k => $v) {
+        if (is_array($v) && (isset($v['id']) || isset($v['product_id']))) {
+            $id  = $v['id'] ?? $v['product_id'];
+            $qty = $v['quantity'] ?? $v['qty'] ?? 1;
+        } elseif (is_numeric($k)) {
+            // shape: [ productId => qty ]
+            $id  = $k;
+            $qty = is_numeric($v) ? (int)$v : 1;
+        } else {
+            continue;
+        }
+
+        $product = $this->productModel->getById($id);
+        if (!$product) continue;
+
+        // determine price field (support possible keys)
+        $price = $product['price'] ?? $product['prix'] ?? $product['unit_price'] ?? 0;
+        $qty = max(1, (int)$qty);
+        $subtotal = round($price * $qty, 2);
+
+        $product['quantity'] = $qty;
+        $product['subtotal'] = $subtotal;
+        $products[] = $product;
+
+        $total += $subtotal;
+    }
+
+    $total = round($total, 2);
+
+    // Create order: prefer orderModel->create if available, else fallback to PDO insert
+    $commande_id = null;
+    if (isset($this->orderModel) && method_exists($this->orderModel, 'create')) {
+        // adapt to your orderModel signature; pass total and products if supported
+        $commande_id = $this->orderModel->create($user['id'], $nom, $email, $adresse, $paiement, $products, $total);
+    }
+
+    if (empty($commande_id)) {
+        // fallback: insert into orders table directly
+        if (!isset($this->pdo)) {
+            throw new \RuntimeException('No DB connection available to create order.');
+        }
+        $stmt = $this->pdo->prepare(
+            "INSERT INTO commandes (user_id, nom, email, adresse, total, payment_method, status, created_at)
+             VALUES (:uid, :nom, :email, :adresse, :total, :pm, 'en_attente', NOW())"
+        );
+        $stmt->execute([
+            ':uid' => $user['id'],
+            ':nom' => $nom,
+            ':email' => $email,
+            ':adresse' => $adresse,
+            ':total' => $total,
+            ':pm' => $paiement
+        ]);
+        $commande_id = $this->pdo->lastInsertId();
+
+        // optionally save order items in a separate table (order_items) if you have one
+        if (!empty($products)) {
+            $stmtItem = $this->pdo->prepare(
+                    "INSERT INTO commande_items (commande_id, produit_id, quantite, prix_unitaire)
+                     VALUES (:cid, :pid, :qty, :prix)"
+                );
+                foreach ($products as $p) {
+                    $stmtItem->execute([
+                        ':cid' => $commande_id,
+                        ':pid' => $p['id'] ?? $p['produit_id'] ?? null,
+                        ':qty' => $p['quantity'],
+                        ':prix'=> $p['prix'] ?? $p['price'] ?? 0
+                    ]);
+                }
+        }
+    }
+
+    // Clear cart and redirect to payment or confirmation
+    unset($_SESSION['cart']);
+
+    if ($paiement === 'paypal') {
+        header("Location: index.php?action=payment_page&order_id=" . urlencode($commande_id));
+        exit;
+    }
+
+    header("Location: index.php?action=commande_confirm&order_id=" . urlencode($commande_id));
+    exit;
+}
 
     /**
      * Displays the order confirmation page.
