@@ -1,20 +1,13 @@
 <?php
-require_once __DIR__ . '/../config/config.php';
+$filename = $_GET['file'] ?? '';
+$path = __DIR__ . '/../app/uploads/products/' . basename($filename);
 
-$id = $_GET['id'] ?? null;
-if (!$id) {
-    http_response_code(404);
-    exit('Image non trouvée');
-}
-
-$stmt = $pdo->prepare("SELECT image, image_type FROM produits WHERE id = ?");
-$stmt->execute([$id]);
-$row = $stmt->fetch();
-
-if ($row && $row['image']) {
-    header('Content-Type: ' . ($row['image_type'] ?? 'image/jpeg'));
-    echo $row['image'];
+if (file_exists($path)) {
+    $mime = mime_content_type($path);
+    header("Content-Type: $mime");
+    readfile($path);
+    exit;
 } else {
     http_response_code(404);
-    exit('Image non trouvée');
+    echo "Image non trouvée.";
 }
