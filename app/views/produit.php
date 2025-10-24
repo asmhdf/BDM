@@ -5,7 +5,9 @@
         <div class="col-lg-6 mb-4">
             <div class="card border-0 shadow-sm">
                 <div class="position-relative">
-                    <img src="image.php?id=<?= $product['id'] ?>" class="card-img-top product-main-image" alt="<?= htmlspecialchars($product['nom']) ?>" style="height: 250px; object-fit: contain; background: #f8f9fa;">
+                    <img src="image.php?file=<?= htmlspecialchars($product['image_path']) ?>" 
+                        alt="<?= htmlspecialchars($product['nom']) ?>" class="card-img-top" style="height: 250px; object-fit: contain; background: #f8f9fa;">
+                    
                     <div class="position-absolute top-0 end-0 m-3">
                         <span class="badge bg-success">Disponible</span>
                     </div>

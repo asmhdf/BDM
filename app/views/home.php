@@ -37,11 +37,9 @@
         <div class="col-lg-4 col-md-6 col-sm-12">
             <div class="card card-modern h-100">
                 <div class="position-relative overflow-hidden">
-                    <img src="image.php?id=<?= $p['id'] ?>" 
-                        alt="<?= htmlspecialchars($p['nom']) ?>" 
-                        class="card-img-top"
-                        style="height: 250px; object-fit: contain; background: #f8f9fa;">
-
+                   <img src="image.php?file=<?= htmlspecialchars($p['image_path']) ?>" 
+                        alt="<?= htmlspecialchars($p['nom']) ?>" class="card-img-top" style="height: 250px; object-fit: contain; background: #f8f9fa;">
+                    
                     <!-- <CHANGE> Added overlay with quick actions -->
                     <div class="position-absolute top-0 end-0 p-3">
                         <span class="badge bg-primary rounded-pill">Nouveau</span>

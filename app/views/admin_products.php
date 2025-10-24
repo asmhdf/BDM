@@ -57,7 +57,7 @@
             <div class="card border-0 shadow-sm h-100 product-card">
                 <div class="position-relative">
                    <img src="image.php?file=<?= htmlspecialchars($p['image_path']) ?>" 
-                        alt="<?= htmlspecialchars($p['nom']) ?>">
+                        alt="<?= htmlspecialchars($p['nom']) ?>" class="card-img-top" style="height: 250px; object-fit: contain; background: #f8f9fa;">
                     <div class="position-absolute top-0 end-0 m-2">
                         <span class="badge bg-primary">#<?= $p['id'] ?></span>
                     </div>

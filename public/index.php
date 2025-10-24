@@ -11,6 +11,8 @@ require_once __DIR__ . '/../app/controllers/CartController.php';
 require_once __DIR__ . '/../app/controllers/OrderController.php';
 require_once __DIR__ . '/../app/controllers/AdminHomeController.php';
 require_once __DIR__ . '/../app/controllers/PaymentController.php';
+require_once __DIR__ . '/../app/controllers/DashboardController.php';
+
 
 // Create a reusable instance of OrderController
 $orderController = new OrderController($pdo);
@@ -20,6 +22,14 @@ $action = $_GET['action'] ?? 'home';
 
 // Routing based on the action parameter
 switch ($action) {
+    case 'dashboard':
+        (new DashboardController($pdo))->index();
+        break;
+
+    case 'chart':
+        (new DashboardController($pdo))->generateChart();
+        break;
+
 
     // ----------- Admin Product Actions -----------
     case 'admin_delete_image':

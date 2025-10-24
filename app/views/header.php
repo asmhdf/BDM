@@ -186,6 +186,11 @@
                             <i class="fas fa-list-alt me-1"></i>Admin Commandes
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.php?action=dashboard">
+                            <i class="fas fa-list-alt me-1"></i>Analyse vente
+                        </a>
+                    </li>
                 <?php endif; ?>
                 
                 <?php if (!empty($_SESSION['user'])): ?>

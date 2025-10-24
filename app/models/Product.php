@@ -16,6 +16,10 @@ class Product {
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
     }
+    public function getAllProducts() {
+        return $this->getAll();
+    }
+
 
     public function getById($id) {
         $stmt = $this->pdo->prepare("SELECT * FROM produits WHERE id = ?");
@@ -44,6 +48,12 @@ class Product {
 
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute($params);
+    }
+    
+    public function getImages($id) {
+        $stmt = $this->pdo->prepare("SELECT id, image_type FROM images WHERE produit_id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetchAll(); // Returns an array of images
     }
 
     public function delete($id) {

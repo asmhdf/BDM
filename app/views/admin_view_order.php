@@ -132,11 +132,9 @@
                                 <?php foreach ($orderItems as $item): ?>
                                     <tr>
                                         <td class="py-3">
-                                            <?php if ($item['image']): ?>
-                                                <img src="image.php?id=<?= $item['id'] ?>" 
-                                                     class="rounded shadow-sm" 
-                                                     width="60" height="60" 
-                                                     style="object-fit: cover;">
+                                            <?php if ($item['image_path']): ?>
+                                                 <img src="image.php?file=<?= htmlspecialchars($item['image_path']) ?>" 
+                                                        alt="<?= htmlspecialchars($item['nom']) ?>" class="card-img-top" style="height: 250px; object-fit: contain; background: #f8f9fa;">
                                             <?php else: ?>
                                                 <div class="bg-light rounded d-flex align-items-center justify-content-center" 
                                                      style="width: 60px; height: 60px;">

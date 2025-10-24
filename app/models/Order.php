@@ -59,15 +59,30 @@ class Order {
 
     // Fetch all items belonging to a specific order
     public function getItems($commande_id) {
-        $stmt = $this->pdo->prepare("
-            SELECT ci.*, p.nom, p.image, p.image_type
-            FROM commande_items ci
-            JOIN produits p ON ci.produit_id = p.id
-            WHERE ci.commande_id = ?
+    // Récupère les produits commandés + image principale
+    $stmt = $this->pdo->prepare("
+        SELECT ci.*, p.nom, p.image_path
+        FROM commande_items ci
+        JOIN produits p ON ci.produit_id = p.id
+        WHERE ci.commande_id = ?
+    ");
+    $stmt->execute([$commande_id]);
+    $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Récupérer les images supplémentaires pour chaque produit
+    foreach ($items as &$item) {
+        $stmtImg = $this->pdo->prepare("
+            SELECT id, image, image_type
+            FROM images
+            WHERE produit_id = ?
         ");
-        $stmt->execute([$commande_id]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmtImg->execute([$item['produit_id']]);
+        $item['images_supp'] = $stmtImg->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    return $items;
+}
+
 
     // Fetch all orders
     public function getAllOrders() {
